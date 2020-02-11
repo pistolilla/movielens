@@ -19,7 +19,6 @@ def genres():
 @app.route("/api/movies", methods=['POST'])
 def movies():
 	# reading params
-	#print(request.get_json())
 	try:
 		jsonobj = request.get_json()
 		genres = jsonobj['genres']
@@ -28,6 +27,14 @@ def movies():
 		raise Exception("Invalid input")
 	# querying
 	res = getMovies(search, genres=genres)
+	return jsonify(list(res))
+
+@app.route("/api/recommendations", methods=['POST'])
+def recommendations():
+	genres = ["Action","Adventure"]
+	# reading params
+	# querying
+	res = getMovies(genres=genres, limit=5)
 	return jsonify(list(res))
 
 if __name__=='__main__':

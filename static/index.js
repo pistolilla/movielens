@@ -1,6 +1,3 @@
-// global
-var ratings = new Set();
-
 // Read URL parameters
 $.urlParam = function(name) {
     var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.search);
@@ -58,7 +55,7 @@ $.getMovies = function() {
 // Movies Info Handler
 $.getInfo = function(event) {
     // clearing and showing gifs
-    $("#info").empty();
+    $("#info, #infoimg").empty();
     $('#infogif').show();
     var movieId = $(this).attr('data-movieid');
     var imdbId = $(this).attr('data-imdbid');
@@ -76,7 +73,7 @@ $.getInfo = function(event) {
         $("#info").html(`
         <b>${title}</b><br/>
         ${result.Plot}<br/>
-        <button type="button" class="btn btn-success btn-block m-0 mt-1 ratingbtn" id="ratingbtn" data-movieid="${movieId}" data-title="${title}">Rate this movie</button>
+        <button type="button" class="btn btn-info btn-block m-0 mt-1" id="ratingbtn" data-movieid="${movieId}" data-title="${title}">Rate this movie</button>
         `);
     })
     .fail($.ajaxError);
@@ -113,23 +110,83 @@ $(function() {
     $("#search").on('keyup', $.getMovies);
     // genres switches listener
     $(document).on('click', '.genreswitch input', $.getMovies);
-
     // info buttons listener
-    $(document).on('click', `#results button`, $.getInfo);
+    $(document).on('click', '#results button', $.getInfo);
+    $(document).on('click', '#recommendations button', $.getInfo);
 
     // rating buton listener
-    $(document).on('click', `#info button`, function() {
-    //$(".ratingbtn").click(function() {
-        alert("click");
+    $(document).on('click', '#info button', function() {
         // reading input
         var movieId = $(this).attr('data-movieid');
         var title = $(this).attr('data-title');
-        // adding item
-        ratings.add({"movieId": movieId, "title": title});
-        //$.refreshRatings();
-        $.each(ratings, function(i, field) {
-            // populating container
-            alert(field);
+        // if already in list
+        if ($(`#rd_${movieId}`).length) {
+            alert(`"${title}" is already in your ratings list`)
+        }
+        else {
+            // adding item to control
+            $('#ratings').append(`
+                <div id="rd_${movieId}" class="list-group-item d-flex justify-content-between align-items-center p-0 pl-2">
+                    ${title}
+                    <span class="badge badge-pill">
+                        <button data-movieid="${movieId}" type="button" class="btn btn-secondary btn-sm deletebtn">X</button>
+                    </span>
+                </div>
+                <div id="rr_${movieId}">
+                    <input type="range" id="r_${movieId}" class="custom-range" min="0.5" max="5" step="0.5" value="3">
+                </div>
+            `);
+        }
+    });
+
+    // delete rating listener
+    $(document).on('click', '#ratings button', function() {
+        // reading input
+        var movieId = $(this).attr('data-movieid');
+        // delete div and control
+        $(`#rd_${movieId}`).remove();
+        $(`#rr_${movieId}`).remove();
+    });
+
+    // recommend button listener
+    $("#recommendbtn").click(function() {
+        // reading user's ratings
+        var ratings = [];
+        $("#ratings input").each(function(index, obj) {
+            var movieId = obj.id.replace("r_", "");
+            var rating = obj.value;
+            ratings.push({"movieId": movieId, "rating": rating});
         });
+        //alert(JSON.stringify(ratings));
+        body = JSON.stringify(ratings);
+
+        // not enough ratings
+        if (ratings.length < 3) {
+            alert("Please rate at least 3 movies (the more the better)");
+            return;
+        }
+
+        //// fetch recommendations
+        // clearing and showing gifs
+        $("#recommendations").empty();
+        $('#recommendationsgif').show();
+
+        $.ajax({
+            type: 'POST', contentType: "application/json", dataType: 'json',
+            url: '/api/recommendations', data: body})
+        .done(function(result) {
+            $('#recommendationsgif').hide();
+
+            // iterating through results
+            $.each(result, function(i, field) {
+                // populating container
+                htmlblock = `
+                <button type="button" class="btn btn-outline-info btn-block text-left font-weight-bold m-0" id="m_${field.movieId}" data-movieid="${field.movieId}" data-imdbid="${field.imdbId}">${field.title}</button>
+                `;
+                $("#recommendations").append(htmlblock);
+            });
+        })
+        .fail($.ajaxError);
+
     });
 });
