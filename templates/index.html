@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <!-- content -->
+    <div class="row m-1">
+        <!-- left panel -->
+        <div class="col-sm-12 col-md-3 col-lg-2 p-1">
+            <!-- genres -->
+            <div class="card border-info mb-2 genreswitch">
+                <div class="card-header">Choose genres</div>
+                <div id="genres" class="m-1"></div>
+            </div>
+        </div>
+        <!-- central panel -->
+        <div class="col-sm-12 col-md-6 col-lg-8 p-1">
+            <div class="form-group m-0">
+                <input type="text" class="form-control" placeholder="Search" id="search">
+            </div>
+            <img id="resultsgif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
+            <div id="results" class="row m-0"></div>
+        </div>
+        <!-- right panel -->
+        <div class="col-sm-12 col-md-3 col-lg-2 p-1">
+            <!-- info -->
+            <div class="card border-success mb-2">
+                <div class="card-header">Movie Info</div>
+                <img id="infogif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
+                <div id="infoimg"></div>
+                <div id="info" class="m-1"></div>
+            </div>
+            <!-- ratings -->
+            <div id="ratingscontainer" class="card border-success mb-2">
+                <div class="card-header">Your ratings</div>
+                <div id="ratings" class="m-1">
+                    <label for="customRange2">Example range</label>
+                    <input type="range" class="custom-range" min="0.5" max="5" step="0.5" id="customRange2">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="application/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+{% endblock %}
