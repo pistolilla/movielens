@@ -1,12 +1,12 @@
 # %%
-import os
+import os, re
 import sqlite3
 import pandas as pd
 
-# %%
+# %% Constants
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 PARENT_DIR = os.path.dirname(THIS_DIR)
-DB_FILE = os.path.join(PARENT_DIR, 'data', 'db1.sqlite')
+DB_FILE = os.path.join(PARENT_DIR, 'data', 'db3.sqlite')
 DDL_FILE = os.path.join(THIS_DIR, "ddl.sql.txt")
 
 # %% Some functions
@@ -24,49 +24,96 @@ def dbQuery(sql):
         yield row
     conn.close()
 
-# %% Database init
-conn = sqlite3.connect(DB_FILE)
-with open(DDL_FILE) as f:
-    for line in f:
-        conn.execute(line)
+def dbExecute(sql):
+    conn = sqlite3.connect(DB_FILE)
+    conn.execute(sql)
+    conn.commit()
     conn.close()
 
-# %% Csv read
-df = pd.read_csv(os.path.join(PARENT_DIR, 'data', 'movies.csv'))
-df
+# %% Database init
+def initDB():
+    conn = sqlite3.connect(DB_FILE)
+    print(".. initializing {}".format(DB_FILE))
+    with open(DDL_FILE) as f:
+        for line in f:
+            conn.execute(line)
+        conn.close()
 
-# %% Database dump: movie
-subset = df[['movieId', 'title']]
-tuples = [tuple(x) for x in subset.values]
-insertInto("movie", tuples)
+# %% Database dump
+def populateDB():
+    # Database dump: movie
+    df = pd.read_csv(os.path.join(PARENT_DIR, 'data', 'movies.csv'))
+    subset = df[['movieId', 'title']]
+    tuples = [tuple(x) for x in subset.values]
+    insertInto("movie", tuples)
 
-# %% Database dump: genre
-subset = df[['movieId', 'genres']]
-# Spliting values in column
-column = subset.pop('genres').str.split('|')
-subset = subset.join(column)
-# Ungroup column
-subset = subset.explode('genres').reset_index(drop=True)
-tuples = [tuple(x) for x in subset.values]
-insertInto("genre", tuples)
+    # Database dump: genre
+    subset = df[['movieId', 'genres']]
+    # Spliting values in column
+    column = subset.pop('genres').str.split('|')
+    subset = subset.join(column)
+    # Ungroup column
+    subset = subset.explode('genres').reset_index(drop=True)
+    tuples = [tuple(x) for x in subset.values]
+    insertInto("genre", tuples)
 
-# %% public functions
-def getMovies(search='', genres=[]):
-    gfilter = "1" # No genre filters
-    if len(genres) > 0:
-        gfilter = "genre IN ('{}')".format("','".join(genres))
-    sfilter = "1" # No genre filters
-    if len(search) > 0:
-        sfilter = "LOWER(title) LIKE ('%{}%')".format(search.lower())
+    # Database dump: movie
+    df = pd.read_csv(os.path.join(PARENT_DIR, 'data', 'links.csv'))
+    subset = df[['movieId', 'imdbId', 'tmdbId']]
+    tuples = [tuple(x) for x in subset.values]
+    insertInto("link", tuples)
+
+    # DB Corrections
+    sql = "UPDATE genre SET genre = '(not specified)' WHERE genre = '(no genres listed)'"
+    dbExecute(sql)
+
+
+# %% Retrieve Genres
+def getGenres():
     sql = '''
-    SELECT movieId, title, genre
+    SELECT DISTINCT genre
+    FROM genre
+    ORDER BY genre LIKE ('(%)'), genre
+    '''
+    for (genre, ) in dbQuery(sql):
+        yield genre
+
+# %% Retrieve Movies
+def getMovies(search='', genres=[], limit=100):
+    genres = "','".join(genres)
+    sfilter = "1" # No search filters
+    if len(search) > 0:
+        if re.match(r'^".+"$', search):
+            search = search.replace('"', "") + " (%"
+        else:
+            search = "%{}%".format(search.replace(" ", "%"))
+        sfilter = "LOWER(title) LIKE ('{}')".format(search.lower())
+        print(sfilter)
+    sql = '''
+    SELECT movieId, title,
+        GROUP_CONCAT(genre) AS genre,
+        'tt' || SUBSTR('0000000' || imdbId, -7) AS imdbId
     FROM movie
-    LEFT JOIN genre USING(movieId)
-    WHERE {} AND {}
-    '''.format(gfilter, sfilter)
-    return dbQuery(sql)
+        LEFT JOIN genre USING(movieId)
+        LEFT JOIN link USING(movieId)
+    WHERE genre IN ('{}') AND {}
+    GROUP BY movieId
+    LIMIT {}
+    '''.format(genres, sfilter, limit)
+    for (movieId, title, genre, imdbId) in dbQuery(sql):
+        yield {
+            "movieId": movieId,
+            "title": title,
+            "imdbId": imdbId,
+            "genre": genre.split(",")}
 
 # %%
-[x for x in getMovies('BAD BoYS', genres=['Western', 'Comedy'])]
+if __name__ == "__main__":
+    initDB()
+    populateDB()
+
+# %% Tests
+#print([x for x in getMovies('the part II', genres=['Western', 'Comedy'])])
+#print([x for x in getGenres()])
 
 # %%
