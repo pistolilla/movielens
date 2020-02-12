@@ -6,7 +6,7 @@ import pandas as pd
 # %% Constants
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 PARENT_DIR = os.path.dirname(THIS_DIR)
-DB_FILE = os.path.join(PARENT_DIR, 'data', 'db3.sqlite')
+DB_FILE = os.path.join(PARENT_DIR, 'data', 'db1.sqlite')
 DDL_FILE = os.path.join(THIS_DIR, "ddl.sql.txt")
 
 # %% Some functions
