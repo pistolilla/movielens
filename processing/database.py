@@ -107,6 +107,25 @@ def getMovies(search='', genres=[], limit=100):
             "imdbId": imdbId,
             "genre": genre.split(",")}
 
+def getMoviesById(ids=[]):
+    idstr = ",".join(map(str, ids))
+    sql = '''
+    SELECT movieId, title,
+        GROUP_CONCAT(genre) AS genre,
+        'tt' || SUBSTR('0000000' || imdbId, -7) AS imdbId
+    FROM movie
+        LEFT JOIN genre USING(movieId)
+        LEFT JOIN link USING(movieId)
+    WHERE movieId IN ({})
+    GROUP BY movieId
+    '''.format(idstr)
+    for (movieId, title, genre, imdbId) in dbQuery(sql):
+        yield {
+            "movieId": movieId,
+            "title": title,
+            "imdbId": imdbId,
+            "genre": genre.split(",")}
+
 # %%
 if __name__ == "__main__":
     initDB()
@@ -115,5 +134,6 @@ if __name__ == "__main__":
 # %% Tests
 #print([x for x in getMovies('the part II', genres=['Western', 'Comedy'])])
 #print([x for x in getGenres()])
+#print([x for x in getMoviesById([15, 16, 17, 1])])
 
 # %%

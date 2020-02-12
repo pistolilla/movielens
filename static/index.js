@@ -153,8 +153,8 @@ $(function() {
         // reading user's ratings
         var ratings = [];
         $("#ratings input").each(function(index, obj) {
-            var movieId = obj.id.replace("r_", "");
-            var rating = obj.value;
+            var movieId = parseInt(obj.id.replace("r_", ""));
+            var rating = parseFloat(obj.value);
             ratings.push({"movieId": movieId, "rating": rating});
         });
         //alert(JSON.stringify(ratings));
