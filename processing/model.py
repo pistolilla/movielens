@@ -23,7 +23,7 @@ def getSparseSVD(ratings_centered_matrix, K):
 
 def getRecommendedMovies(inputdf, userId=0, limit=5):
     # saving movies list with original order and items rated already by user
-    movies = inputdf['movieId'].unique()
+    movies = sorted(inputdf['movieId'].unique())
     seen = list(inputdf[inputdf['userId'] == userId]['movieId'])
     # fixing index to be multilevel with userId and movieId
     inputdf.set_index(['userId', 'movieId'], inplace=True)
