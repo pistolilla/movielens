@@ -47,13 +47,13 @@ def recommendations():
     inputdf['userId'] = 0
     # merging with all users
     inputdf = pd.concat([inputdf, ratingsdf], sort=False)
-    ids = model.getRecommendedMovies(inputdf, userId=0, limit=10)
-    print("ids:", ids)
 
-    userratings = [int(item['movieId']) for item in items]
-    print("user:", userratings)
-    # querying
+    # getting recommendations
+    ids = model.getRecommendedMovies(inputdf, userId=0, limit=10)
+    # querying movies by Id
     res = database.getMoviesById(ids=ids)
+    # sorting by recommendation score
+    res = sorted(res, key=lambda x: ids.index(x['movieId']))
     return jsonify(list(res))
 
 if __name__=='__main__':
