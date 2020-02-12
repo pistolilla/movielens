@@ -22,12 +22,13 @@ def getSparseSVD(ratings_centered_matrix, K):
     return u, sigma, vt
 
 def getRecommendedMovies(inputdf, userId=0, limit=5):
+    # casting columns to avoid errors
+    inputdf = inputdf.astype({"movieId":"int64", "userId":"int64", "rating":'float64'})
     # saving movies list with original order and items rated already by user
     movies = sorted(inputdf['movieId'].unique())
     seen = list(inputdf[inputdf['userId'] == userId]['movieId'])
     # fixing index to be multilevel with userId and movieId
     inputdf.set_index(['userId', 'movieId'], inplace=True)
-    inputdf = inputdf.astype('float64')
 
     # create new ratings_matrix
     ratings_matrix_plus = sps.csr_matrix((
