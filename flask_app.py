@@ -17,12 +17,16 @@ def startup():
 def main():
     return render_template('index.html')
 
-@app.route("/api/genres")
+@app.route("/movielens")
+def movielens():
+    return render_template('movielens.html')
+
+@app.route("/movielens/api/genres")
 def genres():
     res = database.getGenres()
     return jsonify(list(res))
 
-@app.route("/api/movies", methods=['POST'])
+@app.route("/movielens/api/movies", methods=['POST'])
 def movies():
     # reading params
     try:
@@ -35,7 +39,7 @@ def movies():
     res = database.getMovies(search=search, genres=genres)
     return jsonify(list(res))
 
-@app.route("/api/recommendations", methods=['POST'])
+@app.route("/movielens/api/recommendations", methods=['POST'])
 def recommendations():
     # reading params
     try:
