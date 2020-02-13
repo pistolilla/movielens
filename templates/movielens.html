@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <!-- content -->
+    <div class="row m-1">
+        <!-- left panel -->
+        <div class="col-sm-12 col-md-3 col-lg-2 p-1">
+            <!-- genres -->
+            <div class="card border-dark mb-2 genreswitch">
+                <div class="card-header">Choose genres</div>
+                <div id="genres" class="m-1"></div>
+            </div>
+        </div>
+        <!-- central panel -->
+        <div class="col-sm-12 col-md-6 col-lg-8 p-1">
+            <div id="recommendations" class="row m-0"></div>
+            <img id="recommendationsgif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
+            <hr class="m-0 mb-2"/>
+            <!-- <div class="list-group">
+                <div id="resultshead" class="list-group-item list-group-item-action active">Catalog</div>
+            </div> -->
+            <div class="form-group m-0">
+                <input type="text" class="form-control" placeholder="Search" id="search">
+            </div>
+            <div id="results" class="row m-0"></div>
+            <img id="resultsgif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
+        </div>
+        <!-- right panel -->
+        <div class="col-sm-12 col-md-3 col-lg-2 p-1">
+            <!-- info -->
+            <div class="card border-info mb-2">
+                <div class="card-header">Movie Information</div>
+                <img id="infogif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
+                <div id="infoimg"></div>
+                <div id="info" class="m-1"></div>
+            </div>
+            <!-- ratings -->
+            <div id="ratingscontainer" class="card border-info mb-2">
+                <div class="card-header">Your ratings</div>
+                <div id="ratings" class="list-group m-1"></div>
+                <div class="m-1">
+                    <button type="button" class="btn btn-info btn-block m-0" id="recommendbtn">Get recommendations</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="application/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+{% endblock %}

@@ -31,7 +31,7 @@ $.getMovies = function() {
     // movies
     $.ajax({
         type: 'POST', contentType: "application/json", dataType: 'json',
-        url: '/api/movies', data: body})
+        url: '/movielens/api/movies', data: body})
     .done(function(result) {
         $('#resultsgif').hide();
         // labeling given result length
@@ -89,7 +89,7 @@ $(function() {
         $('#aboutbox').hide();
 
     // populate genres
-    $.getJSON("/api/genres")
+    $.getJSON("/movielens/api/genres")
     .done(function(result) {
         // iterating through results
         $.each(result, function(i, value) {
@@ -173,7 +173,7 @@ $(function() {
 
         $.ajax({
             type: 'POST', contentType: "application/json", dataType: 'json',
-            url: '/api/recommendations', data: body})
+            url: '/movielens/api/recommendations', data: body})
         .done(function(result) {
             $('#recommendationsgif').hide();
 
