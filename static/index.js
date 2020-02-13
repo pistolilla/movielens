@@ -62,7 +62,7 @@ $.getInfo = function(event) {
     var title = $(this).html();
 
     // populate infobox
-    var url = "http://www.omdbapi.com"
+    var url = "https://www.omdbapi.com"
     var apikey = "54e36e8c";
     $.getJSON(`${url}?i=${imdbId}&apikey=${apikey}`)
     .done(function(result) {
