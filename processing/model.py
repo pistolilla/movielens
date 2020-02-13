@@ -33,7 +33,8 @@ def getRecommendedMovies(inputdf, userId=0, limit=5):
     # create new ratings_matrix
     ratings_matrix_plus = sps.csr_matrix((
         inputdf['rating'],
-        (inputdf.index.codes[0], inputdf.index.codes[1])
+        #(inputdf.index.codes[0], inputdf.index.codes[1])
+        (inputdf.index.labels[0], inputdf.index.labels[1])
         )).todense()
 
     user_ratings_mean = np.mean(ratings_matrix_plus, axis = 1)
