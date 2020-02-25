@@ -82,6 +82,8 @@ $.getInfo = function(event) {
 // DocumentReady
 $(function() {
     //// init
+    // semantic ui
+    $(".rating").rating();
     $('.loadinggif').hide();
 
     // if about undefined
@@ -133,9 +135,10 @@ $(function() {
                     </span>
                 </div>
                 <div id="rr_${movieId}">
-                    <input type="range" id="r_${movieId}" class="custom-range" min="0.5" max="5" step="0.5" value="3">
+                    <div id="r_${movieId}" class="ui large star rating" data-rating="3" data-max-rating="5"></div>
                 </div>
             `);
+            $(`#r_${movieId}`).rating();
         }
     });
 
@@ -152,9 +155,10 @@ $(function() {
     $("#recommendbtn").click(function() {
         // reading user's ratings
         var ratings = [];
-        $("#ratings input").each(function(index, obj) {
+        $("#ratings .rating").each(function(index, obj) {
             var movieId = parseInt(obj.id.replace("r_", ""));
-            var rating = parseFloat(obj.value);
+            //var rating = parseFloat(obj.getAttribute('data-rating'));
+            var rating = $(`#${obj.id}`).rating("get rating");
             ratings.push({"movieId": movieId, "rating": rating});
         });
         //alert(JSON.stringify(ratings));
@@ -167,6 +171,8 @@ $(function() {
         }
 
         //// fetch recommendations
+        // scrolling to top
+        $('html, body').animate({scrollTop: '0px'}, 300);
         // clearing and showing gifs
         $("#recommendations").empty();
         $('#recommendationsgif').show();
