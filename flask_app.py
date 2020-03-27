@@ -1,11 +1,14 @@
 import os
 from flask import Flask, render_template, flash, request, jsonify, Markup
+from flask_cors import CORS, cross_origin
 import pandas as pd
 from processing import database, model
 
 # Constants
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 @app.before_first_request
 def startup():
@@ -22,11 +25,13 @@ def movielens():
     return render_template('movielens.html')
 
 @app.route("/movielens/api/genres")
+@cross_origin()
 def genres():
     res = database.getGenres()
     return jsonify(list(res))
 
 @app.route("/movielens/api/movies", methods=['POST'])
+@cross_origin()
 def movies():
     # reading params
     try:
@@ -40,6 +45,7 @@ def movies():
     return jsonify(list(res))
 
 @app.route("/movielens/api/recommendations", methods=['POST'])
+@cross_origin()
 def recommendations():
     # reading params
     try:
