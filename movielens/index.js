@@ -1,17 +1,15 @@
 var routes = [
     {
-        path: '/scratchvue/', component: {
-            template: "<div><h1>Home</h1><p>This is home page</p></div>"
+        path: '/movielens/', component: {
+            template: ""
         }
     },
     {
-        path: '/scratchvue/about', component: {
-            template: "<div><h1>About</h1><p>This is about page</p></div>"
-        }
-    },
-    {
-        path: '/scratchvue/contact', component: {
-            template: "<div><h1>Contact</h1><p>This is contact page</p></div>"
+        path: '/movielens/about', component: {
+            template: `<div id="aboutbox" class="alert alert-dismissible alert-primary m-2">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            AI Movies Recommender is fueled with the MovieLens Dataset from <a href="https://grouplens.org/" target="_blank">Group Lens</a>. Source code and more details <a href="https://github.com/pistolilla/movielens" target="_blank">here</a>.
+            </div>`
         }
     }
 ];
