@@ -128,5 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Node.js dependency directories
+/node_modules
+
 # Custom
 resources/
