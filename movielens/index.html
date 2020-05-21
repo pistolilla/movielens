@@ -6,11 +6,12 @@
         <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootswatch/4.3.1/simplex/bootstrap.min.css">
         <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/rating.min.css">
-        <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script> -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/rating.min.js"></script>
         <script src="//unpkg.com/vue@2.6.11"></script>
         <script src="//unpkg.com/vue-router@3.2.0"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
         <style>
             select {
                 height: 100px;
@@ -29,7 +30,7 @@
 
         <!-- navigation bar -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <router-link class="navbar-brand" to="/movielens/">AI Movies Recommender</router-link>
+            <router-link class="navbar-brand" to="/">AI Movies Recommender</router-link>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -38,12 +39,12 @@
                 </ul>
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item"><a class="nav-link" href="https://documenter.getpostman.com/view/7780376/SzKWtGwH" target="_blank">API docs</a></li>
-                    <li class="nav-item"><router-link class="nav-link" to="/movielens/about">About</router-link></li>
+                    <li class="nav-item"><router-link class="nav-link" to="/about">About</router-link></li>
                 </ul>
             </div>
         </nav>
 
-        <!-- about box -->
+        <!-- about box (legacy) -->
         <router-view></router-view>
 
         <!-- content -->
@@ -53,29 +54,34 @@
                 <!-- genres -->
                 <div class="card border-dark mb-2 genreswitch">
                     <div class="card-header">Choose genres</div>
-                    <div id="genres" class="m-1"></div>
+                    <div id="genres" class="m-1">
+                        <div v-for="(item, index) in genres" class="custom-control custom-switch">
+                            <input :id="prepend('g_',index)" v-model:checked="item.checked" type="checkbox" class="custom-control-input">
+                            <label class="custom-control-label" :for="prepend('g_',index)">{{item.value}}</label>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- central panel -->
             <div class="col-sm-12 col-md-6 col-lg-8 p-1">
                 <div id="recommendations" class="row m-0"></div>
-                <img id="recommendationsgif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
+                <img v-show="showRecommendationsGif" id="recommendationsgif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
                 <hr class="m-0 mb-2"/>
-                <!-- <div class="list-group">
-                    <div id="resultshead" class="list-group-item list-group-item-action active">Catalog</div>
-                </div> -->
                 <div class="form-group m-0">
-                    <input type="text" class="form-control" placeholder="Search" id="search">
+                    <input type="text" class="form-control" placeholder="Search" id="search" v-model:value="search" @keyup="getMovies()">
                 </div>
-                <div id="results" class="row m-0"></div>
-                <img id="resultsgif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
+                <div id="results" class="row m-0">
+                    <button v-for="field in results" type="button" class="btn btn-secondary btn-block text-left m-0" :id="field.movieId" data-movieid="field.movieId" data-imdbid="field.imdbId">{{field.title}}</button>
+                    <p v-if="results.length == 0" class="m-1">No results found</p>
+                </div>
+                <img v-show="showResultsGif" id="resultsgif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
             </div>
             <!-- right panel -->
             <div class="col-sm-12 col-md-3 col-lg-2 p-1">
                 <!-- info -->
                 <div class="card border-info mb-2">
                     <div class="card-header">Movie Information</div>
-                    <img id="infogif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
+                    <img v-show="showInfoGif" id="infogif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
                     <div id="infoimg"></div>
                     <div id="info" class="m-1"></div>
                 </div>
