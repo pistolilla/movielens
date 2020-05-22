@@ -5,13 +5,10 @@
         <title>AI Movies Recommender</title>
         <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootswatch/4.3.1/simplex/bootstrap.min.css">
         <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/rating.min.css">
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/rating.min.js"></script>
         <script src="//unpkg.com/vue@2.6.11"></script>
         <script src="//unpkg.com/vue-router@3.2.0"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
+        <script src="//cdn.jsdelivr.net/npm/vue-star-rating@1.6.1/dist/star-rating.min.js"></script>
         <style>
             select {
                 height: 100px;
@@ -64,14 +61,16 @@
             </div>
             <!-- central panel -->
             <div class="col-sm-12 col-md-6 col-lg-8 p-1">
-                <div id="recommendations" class="row m-0"></div>
+                <div id="recommendations" class="row m-0">
+                    <button v-for="field in recommendations" v-on:click="getInfo(field)" type="button" class="btn btn-outline-info btn-block text-left font-weight-bold m-0">{{field.title}}</button>
+                </div>
                 <img v-show="showRecommendationsGif" id="recommendationsgif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
                 <hr class="m-0 mb-2"/>
                 <div class="form-group m-0">
                     <input type="text" class="form-control" placeholder="Search" id="search" v-model:value="search" @keyup="getMovies()">
                 </div>
                 <div id="results" class="row m-0">
-                    <button v-for="field in results" type="button" class="btn btn-secondary btn-block text-left m-0" :id="field.movieId" data-movieid="field.movieId" data-imdbid="field.imdbId">{{field.title}}</button>
+                    <button v-for="field in results" v-on:click="getInfo(field)" type="button" class="btn btn-secondary btn-block text-left m-0" :id="field.movieId" data-movieid="field.movieId" data-imdbid="field.imdbId">{{field.title}}</button>
                     <p v-if="results.length == 0" class="m-1">No results found</p>
                 </div>
                 <img v-show="showResultsGif" id="resultsgif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
@@ -82,15 +81,34 @@
                 <div class="card border-info mb-2">
                     <div class="card-header">Movie Information</div>
                     <img v-show="showInfoGif" id="infogif" class="loadinggif" src="//cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" loop="infinite" />
-                    <div id="infoimg"></div>
-                    <div id="info" class="m-1"></div>
+                    <template v-if="info">
+                        <div id="infoimg">
+                            <a :href="'https://www.imdb.com/title/' + info.imdbID" target="_blank"><img class="img-fluid" :src="info.Poster" /></a>
+                        </div>
+                        <div id="info" class="m-1">
+                            <b>{{info.Title}}</b><br/>{{info.Plot}}<br/>
+                            <button v-on:click="addRated(info)" type="button" class="btn btn-info btn-block m-0 mt-1" id="ratingbtn">Rate this movie</button>
+                        </div>
+                    </template>
                 </div>
                 <!-- ratings -->
                 <div id="ratingscontainer" class="card border-info mb-2">
                     <div class="card-header">Your ratings</div>
-                    <div id="ratings" class="list-group m-1"></div>
+                    <div id="ratings" class="list-group m-1">
+                        <template v-for="item in rated">
+                            <div class="list-group-item d-flex justify-content-between align-items-center p-0 pl-2">
+                                {{item.title}}
+                                <span class="badge badge-pill">
+                                    <button v-on:click="deleteRated(item)" type="button" class="btn btn-secondary btn-sm deletebtn">X</button>
+                                </span>
+                            </div>
+                            <div>
+                                <star-rating v-model:rating="item.rating" :star-size="25" :increment="0.5"></star-rating>
+                            </div>
+                        </template>
+                    </div>
                     <div class="m-1">
-                        <button type="button" class="btn btn-info btn-block m-0" id="recommendbtn">Get recommendations</button>
+                        <button v-on:click="getRecommendations" type="button" class="btn btn-info btn-block m-0" id="recommendbtn">Get recommendations</button>
                     </div>
                 </div>
             </div>
