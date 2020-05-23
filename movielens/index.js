@@ -132,11 +132,14 @@ var app = new Vue({
         },
     },
     created() {
+        NProgress.start();
+        NProgress.set(0.1);
         axios.get(`${API_URL}/movielens/api/genres`)
         .then(function(response) {
             this.app.genres = response.data.map(function(obj) {
                 return { value: obj, checked: true };
             });
+            NProgress.done();
         })
         .catch(error => console.log(error));
     },
